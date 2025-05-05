@@ -48,7 +48,7 @@
     <script>
         document.getElementById('nextButton').addEventListener('click', async () => {
             try {
-                const response = await fetch('http://192.168.50.41:51067/v1/trigger/next', {
+                const response = await fetch('http://192.168.50.184:1025/v1/trigger/next', {
                     method: 'GET'
                 });
                 if (!response.ok) {
@@ -61,7 +61,7 @@
 
         document.getElementById('prevButton').addEventListener('click', async () => {
             try {
-                const response = await fetch('http://192.168.50.41:51067/v1/trigger/previous', {
+                const response = await fetch('http://192.168.50.184:1025/v1/trigger/previous', {
                     method: 'GET'
                 });
                 if (!response.ok) {
