@@ -31,6 +31,7 @@
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </div>
+                    <img id="slideThumbnail" class="w-full h-auto rounded-md" src="" alt="Slide Thumbnail">
                 </div>
                 <div id="currentSlideNotes" class="text-sm text-gray-400"></div>
             </div>
@@ -73,18 +74,7 @@
 </div>
 
     <script>
-        let baseUrl = 'http://192.168.5.21:52153';
-
-        function updateBaseUrl() {
-            const ip = document.getElementById('ipInput').value;
-            const port = document.getElementById('portInput').value;
-            if (ip && port) {
-                baseUrl = `http://${ip}:${port}`;
-                alert(`Base URL updated to: ${baseUrl}`);
-            } else {
-                alert('Please enter both IP and Port.');
-            }
-        }
+        let baseUrl = 'http://192.168.50.184:1025';
         let currentSlide = 0;
         let activePresentation = null;
         let slideStatus = null;
@@ -95,12 +85,10 @@
             errorElement.textContent = message;
             errorElement.classList.remove('opacity-0');
             
-            // Clear any existing timeout
             if (errorTimeout) {
                 clearTimeout(errorTimeout);
             }
             
-            // Set new timeout to hide error after 3 seconds
             errorTimeout = setTimeout(() => {
                 errorElement.classList.add('opacity-0');
             }, 3000);
@@ -113,10 +101,20 @@
                 const data = await response.json();
                 slideStatus = data;
                 updateSlideDisplay();
+                await fetchSlideThumbnail();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide status');
             }
         }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await fetchActivePresentation();
+                await fetchSlideStatus();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to initialize data');
+            }
+        });
 
         async function fetchActivePresentation() {
             try {
@@ -127,8 +125,8 @@
                 
                 const slideIndexResponse = await fetch(`${baseUrl}/v1/presentation/slide_index`);
                 if (slideIndexResponse.ok) {
-                    const { index } = await slideIndexResponse.json();
-                    currentSlide = index;
+                    const { presentation_index } = await slideIndexResponse.json();
+                    currentSlide = presentation_index.index;
                 }
                 updatePresentationDisplay();
             } catch (err) {
@@ -149,7 +147,6 @@
                 document.getElementById('currentSlideNotes').textContent = slideStatus.current?.notes ? `Notes: ${slideStatus.current.notes}` : '';
                 document.getElementById('nextSlideNotes').textContent = slideStatus.next?.notes ? `Notes: ${slideStatus.next.notes}` : '';
                 
-                // Hide loading spinners after update
                 document.getElementById('loadingSpinner').classList.add('hidden');
                 document.getElementById('nextLoadingSpinner').classList.add('hidden');
             }
@@ -157,7 +154,6 @@
 
         async function handlePrevious() {
             try {
-                // Show loading spinner
                 document.getElementById('loadingSpinner').classList.remove('hidden');
                 
                 const response = await fetch(`${baseUrl}/v1/presentation/active/previous/trigger`, {
@@ -171,44 +167,46 @@
                 if (currentSlide > 0) {
                     currentSlide--;
                     await fetchSlideStatus();
+                    await fetchActivePresentation(); // Ensure activePresentation is updated
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to trigger previous slide');
-                // Hide loading spinner on error
                 document.getElementById('loadingSpinner').classList.add('hidden');
             }
         }
 
         async function handleNext() {
             try {
-                // Show loading spinner
                 document.getElementById('nextLoadingSpinner').classList.remove('hidden');
-                
-                const response = await fetch(`${baseUrl}/v1/presentation/active/next/trigger`, {
-                    method: 'GET'
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to trigger next slide');
-                }
-                
+                const response = await fetch(`${baseUrl}/v1/presentation/active/next/trigger`, { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to trigger next slide');
                 currentSlide++;
                 await fetchSlideStatus();
+                await fetchActivePresentation(); // Ensure activePresentation is updated
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to trigger next slide');
-                // Hide loading spinner on error
                 document.getElementById('nextLoadingSpinner').classList.add('hidden');
             }
         }
 
-        // Initial fetch and set up polling
-        fetchActivePresentation();
-        fetchSlideStatus();
-        setInterval(fetchSlideStatus, 1000);
+        // Removed setInterval(fetchSlideStatus, 1000);
+        
+        async function fetchSlideThumbnail() {
+            try {
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('slideThumbnail').src = url;
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
+            }
+        }
 
         function updatePresentationDisplay() {
             const presentationElement = document.getElementById('presentationName');
-            console
+            console.log(activePresentation);
             if (activePresentation && activePresentation.presentation && activePresentation.presentation) {
                 presentationElement.textContent = `Current Presentation: ${activePresentation.presentation.id.name}`;
             } else {
