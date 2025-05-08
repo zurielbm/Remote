@@ -15,37 +15,38 @@
     </style>
 </head>
 <body class="bg-gray-900 text-white m-0 min-h-screen flex flex-col items-center p-4 font-sans">
-    <h1 class="text-purple-400 text-3xl md:text-4xl mb-6 md:mb-8 text-center">ProPresenter Slide Clicker</h1>
-    <div id="presentationName" class="text-base md:text-lg mb-3 md:mb-4 text-purple-300 text-center px-2"></div>
+    <h1 class="text-purple-400 text-xs md:text-4xl mb-2 md:mb-8 text-center">ProPresenter Slide Clicker</h1>
+    <div id="presentationName" class="text-sm md:text-lg mb-2 md:mb-4 text-purple-300 text-center px-2"></div>
     <div id="error" class="text-red-500 mb-3 md:mb-4 text-center px-2"></div>
 
     <div class="w-full max-w-4xl mb-4 md:mb-6 px-2">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <div class="bg-gray-800 rounded-lg p-3 md:p-4">
                 <div class="text-lg md:text-xl font-semibold mb-2">Current Slide</div>
-                <div id="currentSlideText" class="whitespace-pre-wrap mb-2 relative text-sm md:text-base">
-                    <span class="content">No content available</span>
+                <div id="currentSlideText" class="mb-2 relative text-sm md:text-base flex md:flex-col justify-between items-center">
+                    <p class="content min-h-14 h-auto">No content available</p>
                     <div id="loadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
                         <svg class="animate-spin h-8 w-8 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </div>
-                    <img id="slideThumbnail" class="w-full h-auto rounded-md" src="" alt="Slide Thumbnail">
+                    <img id="slideThumbnail" class="md:w-full w-40 rounded-md" src="" alt="Slide Thumbnail">
                 </div>
                 <div id="currentSlideNotes" class="text-sm text-gray-400"></div>
             </div>
 
             <div class="bg-gray-800 rounded-lg p-3 md:p-4">
-                <div class="text-lg md:text-xl font-semibold mb-2">Next Slide</div>
-                <div id="nextSlideText" class="whitespace-pre-wrap mb-2 relative text-sm md:text-base">
-                    <span class="content">No content available</span>
+                <div class="text-sm md:text-xl font-semibold mb-2">Next Slide</div>
+                <div id="nextSlideText" class="mb-2 relative text-sm md:text-base flex justify-between items-center flex md:flex-col">
+                    <p class="content md:min-h-14 h-full text-xs md:text-base">No content available</p>
                     <div id="nextLoadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
                         <svg class="animate-spin h-8 w-8 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                     </div>
+                       <img id="nextSlideThumbnail" class="md:w-full w-40 rounded-md md:block hidden" src="" alt="Next Slide Thumbnail">
                 </div>
                 <div id="nextSlideNotes" class="text-sm text-gray-400"></div>
             </div>
@@ -64,7 +65,7 @@
     </div>
 
     <!-- Add text fields at the bottom -->
-    <div class="w-full max-w-4xl mb-4 md:mb-6 px-2 mt-auto">
+    <div class="w-full max-w-4xl mb-4 md:mb-6 px-2 mt-20">
         <input type="text" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
         <input type="text" id="portInput" placeholder="PORT" class=" p-2 bg-gray-800 text-white rounded-md">
         <button onclick="updateBaseUrl()" class=" px-6 py-2 bg-purple-900 hover:bg-purple-800 rounded-md text-md mt-2">
@@ -102,6 +103,7 @@
                 slideStatus = data;
                 updateSlideDisplay();
                 await fetchSlideThumbnail();
+                await fetchNextSlideThumbnail();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide status');
             }
@@ -200,14 +202,38 @@
         
         async function fetchSlideThumbnail() {
             try {
+                document.getElementById('loadingSpinner').classList.remove('hidden'); // Show spinner
                 const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
                 console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
                 if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 document.getElementById('slideThumbnail').src = url;
+                document.getElementById('slideThumbnail').style.display = 'block'; // Show thumbnail
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
+                document.getElementById('slideThumbnail').style.display = 'none'; // Hide thumbnail
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('hidden'); // Hide spinner
+            }
+        }
+
+        async function fetchNextSlideThumbnail() {
+            try {
+                document.getElementById('nextLoadingSpinner').classList.remove('hidden'); // Show spinner
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide+1}?quality=400`);
+                console.log("Next Slide");
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide+1}?quality=400`);
+                if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('nextSlideThumbnail').src = url;
+                document.getElementById('nextSlideThumbnail').style.display = 'block'; // Show thumbnail
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
+                document.getElementById('nextSlideThumbnail').style.display = 'none'; // Hide thumbnail
+            } finally {
+                document.getElementById('nextLoadingSpinner').classList.add('hidden'); // Hide spinner
             }
         }
 
