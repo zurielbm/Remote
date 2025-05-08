@@ -189,7 +189,14 @@
             }
         }
 
-        // Removed setInterval(fetchSlideStatus, 1000);
+        setInterval(async function() {
+            try {
+                await fetchActivePresentation();
+                await fetchSlideStatus();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to refresh data');
+            }
+        }, 10000);
         
         async function fetchSlideThumbnail() {
             try {
