@@ -66,7 +66,7 @@
 
     <!-- Add text fields at the bottom -->
     <div class="w-full max-w-4xl mb-4 md:mb-6 px-2 mt-20">
-        <input type="password" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
+        <input type="text" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
         <input type="text" id="portInput" placeholder="PORT" class=" p-2 bg-gray-800 text-white rounded-md">
         <button onclick="updateBaseUrl()" class=" px-6 py-2 bg-purple-900 hover:bg-purple-800 rounded-md text-md mt-2">
             Submit
@@ -104,6 +104,7 @@
             
             if (ip && port) {
                 const newBaseUrl = `http://${ip}:${port}`;
+                console.log(newBaseUrl);
                 baseUrl = newBaseUrl;
                 localStorage.setItem('baseUrl', newBaseUrl);
                 
