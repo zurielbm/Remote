@@ -66,7 +66,7 @@
 
     <!-- Add text fields at the bottom -->
     <div class="w-full max-w-4xl mb-4 md:mb-6 px-2 mt-20">
-        <input type="text" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
+        <input type="password" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
         <input type="text" id="portInput" placeholder="PORT" class=" p-2 bg-gray-800 text-white rounded-md">
         <button onclick="updateBaseUrl()" class=" px-6 py-2 bg-purple-900 hover:bg-purple-800 rounded-md text-md mt-2">
             Submit
@@ -75,7 +75,7 @@
 </div>
 
     <script>
-        let baseUrl = 'http://192.168.50.16:1025';
+        let baseUrl = localStorage.getItem('baseUrl') || 'http://192.168.50.16:1025';
         let currentSlide = 0;
         let activePresentation = null;
         let slideStatus = null;
@@ -93,6 +93,42 @@
             errorTimeout = setTimeout(() => {
                 errorElement.classList.add('opacity-0');
             }, 3000);
+        }
+
+        function updateBaseUrl() {
+            const ipInput = document.getElementById('ipInput');
+            const portInput = document.getElementById('portInput');
+            
+            const ip = ipInput.value.trim();
+            const port = portInput.value.trim();
+            
+            if (ip && port) {
+                const newBaseUrl = `http://${ip}:${port}`;
+                baseUrl = newBaseUrl;
+                localStorage.setItem('baseUrl', newBaseUrl);
+                
+                // Clear the input fields
+                ipInput.value = '';
+                portInput.value = '';
+                
+                // Refresh the data with the new URL
+                fetchActivePresentation();
+                fetchSlideStatus();
+                
+                setError('Base URL updated successfully!');
+            } else {
+                setError('Please enter both IP and Port');
+            }
+        }
+
+        function displayCurrentUrl() {
+            const ipInput = document.getElementById('ipInput');
+            const portInput = document.getElementById('portInput');
+            
+            // Extract IP and port from the current baseUrl
+            const url = new URL(baseUrl);
+            ipInput.placeholder = `Current IP: ${url.hostname}`;
+            portInput.placeholder = `Current Port: ${url.port}`;
         }
 
         async function fetchSlideStatus() {
@@ -113,6 +149,7 @@
             try {
                 await fetchActivePresentation();
                 await fetchSlideStatus();
+                displayCurrentUrl();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to initialize data');
             }
