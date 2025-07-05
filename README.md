@@ -25,7 +25,7 @@ This project is a simple web-based application designed to act as a remote viewe
     
     -   This application is designed to work within a  **local network**  environment.
         
-    -   It communicates directly with the ProPresenter API using HTTP. Due to  **Cross-Origin Resource Sharing (CORS)**  policies, accessing the ProPresenter API from a different domain (e.g., using  `http://`  or  `https://`  from an external server) will result in a "cross-origin error" and the application will not function correctly.
+    -   It communicates directly with the ProPresenter API using HTTP.
         
     -   Therefore, the ProPresenter machine and the device running this web application must be on the  **same local network**, and you should use the  **local IP address**  of the ProPresenter machine.
         

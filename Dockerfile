@@ -1,11 +1,14 @@
-# Use nginx alpine as base image for lightweight static file serving
-FROM nginx:alpine
+# Use Python 3.13 alpine image
+FROM python:3.13-alpine
 
-# Copy the HTML file to nginx's default serving directory
-COPY index.html /usr/share/nginx/html/
+WORKDIR /app
 
-# Expose port 80
+COPY server.py /app/
+COPY static/ /app/static/
+
+RUN pip install --no-cache-dir flask requests
+
 EXPOSE 80
 
-# Start nginx in foreground
-CMD ["nginx", "-g", "daemon off;"] 
+# Run Flask app
+CMD ["python3", "server.py"]
