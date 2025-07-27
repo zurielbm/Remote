@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPresenter Slide Viewer</title>
+    <title>ProPresenter Slide Viewer Standalone</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -142,9 +142,12 @@
     <!-- Header with theme toggle -->
     <div class="w-full max-w-6xl flex justify-between items-center mb-6 md:mb-8">
         <div class="flex-1"></div>
-        <h1 class="text-primary-600 dark:text-primary-400 text-2xl md:text-4xl font-bold text-center flex-1">
-            ProPresenter Slide Clicker
-        </h1>
+        <div class="text-center">
+            <h1 class="text-primary-600 dark:text-primary-400 text-2xl md:text-4xl font-bold">
+                ProPresenter Slide Clicker
+            </h1>
+            <p class="text-sm md:text-base text-gray-500 dark:text-gray-400 font-medium mt-1">Standalone Version</p>
+        </div>
         <div class="flex-1 flex justify-end">
             <button onclick="toggleTheme()"
                 class="p-2 rounded-lg bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-gray-700">
@@ -329,15 +332,11 @@
     </div>
 
     <script>
+        let baseUrl = localStorage.getItem('baseUrl') || 'http://192.168.50.81:1025';
         let currentSlide = 0;
         let activePresentation = null;
         let slideStatus = null;
         let errorTimeout = null;
-
-
-        function hasPresentation() {
-            return (activePresentation && activePresentation.presentation && activePresentation.presentation)
-        }
 
         // Theme toggle functionality
         function toggleTheme() {
@@ -388,61 +387,51 @@
             }, 3000);
         }
 
-        // Instead of updating baseUrl in the frontend, POST to Flask
-        async function updateBaseUrl() {
+        function updateBaseUrl() {
             const ipInput = document.getElementById('ipInput');
             const portInput = document.getElementById('portInput');
+
             const ip = ipInput.value.trim();
             const port = portInput.value.trim();
+
             if (ip && port) {
-                try {
-                    const response = await fetch(`/api/update-propresenter`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: "include",
-                        body: JSON.stringify({ ip, port })
-                    });
-                    const data = await response.json();
-                    setError(data.message || "Updated!");
-                    ipInput.value = ip;
-                    portInput.value = port;
-                } catch (err) {
-                    setError('Failed to update ProPresenter backend.');
-                }
+                const newBaseUrl = `http://${ip}:${port}`;
+                baseUrl = newBaseUrl;
+                localStorage.setItem('baseUrl', newBaseUrl);
+
+                // Clear the input fields
+                ipInput.value = '';
+                portInput.value = '';
+
+                // Refresh the data with the new URL
+                fetchActivePresentation();
+                fetchSlideStatus();
+
+                setError('Base URL updated successfully!');
             } else {
                 setError('Please enter both IP and Port');
             }
         }
 
-
         function displayCurrentUrl() {
-            fetch('/api/get-propresenter').then((res) => {
-                if (res.ok) {
-                    // Extract IP and port from server
-                    res.json().then((res2) => {
-                        ipInput.placeholder = `Current IP: ${res2.ip}`;
-                        portInput.placeholder = `Current Port: ${res2.port}`;
-                    })
-                }
-            })
+            const ipInput = document.getElementById('ipInput');
+            const portInput = document.getElementById('portInput');
 
-
+            // Extract IP and port from the current baseUrl
+            const url = new URL(baseUrl);
+            ipInput.placeholder = `Current IP: ${url.hostname}`;
+            portInput.placeholder = `Current Port: ${url.port}`;
         }
 
         async function fetchSlideStatus() {
             try {
-                const response = await fetch(`/v1/status/slide`);
+                const response = await fetch(`${baseUrl}/v1/status/slide`);
                 if (!response.ok) throw new Error('Failed to fetch slide status');
                 const data = await response.json();
-
                 slideStatus = data;
                 updateSlideDisplay();
-                previousSlideStatus = JSON.parse(JSON.stringify(data)); // Deep copy
-
                 await fetchSlideThumbnail();
                 await fetchNextSlideThumbnail();
-                previousCurrentSlide = currentSlide;
-
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide status');
             }
@@ -461,23 +450,17 @@
 
         async function fetchActivePresentation() {
             try {
-                const response = await fetch(`/v1/presentation/active`);
+                const response = await fetch(`${baseUrl}/v1/presentation/active`);
                 if (!response.ok) throw new Error('Failed to fetch active presentation');
                 const data = await response.json();
-
                 activePresentation = data;
-                updatePresentationDisplay();
-                previousActivePresentation = JSON.parse(JSON.stringify(data)); // Deep copy
 
-                const slideIndexResponse = await fetch(`/v1/presentation/slide_index`);
+                const slideIndexResponse = await fetch(`${baseUrl}/v1/presentation/slide_index`);
                 if (slideIndexResponse.ok) {
                     const { presentation_index } = await slideIndexResponse.json();
-                    const newSlideIndex = presentation_index.index;
-
-                    currentSlide = newSlideIndex;
-                    previousCurrentSlide = newSlideIndex;
-
+                    currentSlide = presentation_index.index;
                 }
+                updatePresentationDisplay();
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch presentation data');
             }
@@ -505,7 +488,7 @@
             try {
                 document.getElementById('loadingSkeleton').classList.remove('hidden');
 
-                const response = await fetch(`/v1/presentation/active/previous/trigger`, {
+                const response = await fetch(`${baseUrl}/v1/presentation/active/previous/trigger`, {
                     method: 'GET'
                 });
 
@@ -527,7 +510,7 @@
         async function handleNext() {
             try {
                 document.getElementById('nextLoadingSkeleton').classList.remove('hidden');
-                const response = await fetch(`/v1/presentation/active/next/trigger`, { method: 'GET' });
+                const response = await fetch(`${baseUrl}/v1/presentation/active/next/trigger`, { method: 'GET' });
                 if (!response.ok) throw new Error('Failed to trigger next slide');
                 currentSlide++;
                 await fetchSlideStatus();
@@ -549,21 +532,17 @@
 
         async function fetchSlideThumbnail() {
             try {
-                if (!hasPresentation) return
                 document.getElementById('loadingSkeleton').classList.remove('hidden'); // Show skeleton
-                const response = await fetch(`/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
-                console.log(`/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
                 if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
-
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
-
                 document.getElementById('slideThumbnail').src = url;
                 document.getElementById('slideThumbnail').style.display = 'block'; // Show thumbnail
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
-                // Show placeholder image when thumbnail fails to load
-                document.getElementById('slideThumbnail').style.display = 'none';
+                document.getElementById('slideThumbnail').style.display = 'none'; // Hide thumbnail
             } finally {
                 document.getElementById('loadingSkeleton').classList.add('hidden'); // Hide skeleton
             }
@@ -571,22 +550,19 @@
 
         async function fetchNextSlideThumbnail() {
             try {
-                if (!hasPresentation) return
                 document.getElementById('nextLoadingSkeleton').classList.remove('hidden'); // Show skeleton
-                const response = await fetch(`/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide + 1}?quality=400`);
-                console.log(response)
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide + 1}?quality=400`);
                 console.log("Next Slide");
-                console.log(`/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide + 1}?quality=400`);
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide + 1}?quality=400`);
                 if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
-
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
-
                 document.getElementById('nextSlideThumbnail').src = url;
                 document.getElementById('nextSlideThumbnail').style.display = 'block'; // Show thumbnail
             } catch (err) {
+                console.log(activePresentation.presentation.groups)
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
-                document.getElementById('nextSlideThumbnail').style.display = 'none';
+                document.getElementById('nextSlideThumbnail').style.display = 'none'; // Hide thumbnail
             } finally {
                 document.getElementById('nextLoadingSkeleton').classList.add('hidden'); // Hide skeleton
             }
@@ -595,13 +571,14 @@
         function updatePresentationDisplay() {
             const presentationElement = document.getElementById('presentationName');
             console.log(activePresentation);
-            if (hasPresentation) {
+            if (activePresentation && activePresentation.presentation && activePresentation.presentation) {
                 presentationElement.textContent = `Current Presentation: ${activePresentation.presentation.id.name}`;
             } else {
                 presentationElement.textContent = 'No active presentation';
             }
         }
     </script>
+
     <style>
         @keyframes spin {
             to {
