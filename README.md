@@ -33,7 +33,7 @@ This project is a simple web-based application designed to act as a remote viewe
     
     -   Save the provided HTML code as an  `index.html`  file.
         
-    -   For basic use, you can open  `static/index.html`  directly in a web browser on a computer within the same local network as ProPresenter.
+    -   For basic use, you can open  `standalone.html`  directly in a web browser on a computer within the same local network as ProPresenter.
         
     -   For mobile device access or more robust hosting, you will need to host the application on a local web server (see "Deployment with Docker" below).
         
