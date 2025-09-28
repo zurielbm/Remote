@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProPresenter Slide Viewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white m-0 min-h-screen flex flex-col items-center p-4 font-sans">
+    <h1 class="text-purple-400 text-xs md:text-4xl mb-2 md:mb-8 text-center">ProPresenter Slide Clicker</h1>
+    <div id="presentationName" class="text-sm md:text-lg mb-2 md:mb-4 text-purple-300 text-center px-2"></div>
+    <div id="error" class="text-red-500 mb-3 md:mb-4 text-center px-2"></div>
+
+    <div class="w-full max-w-4xl mb-4 md:mb-6 px-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <div class="bg-gray-800 rounded-lg p-3 md:p-4">
+                <div class="text-lg md:text-xl font-semibold mb-2">Current Slide</div>
+                <div id="currentSlideText" class="mb-2 relative text-sm md:text-base flex md:flex-col justify-between items-center">
+                    <p class="content min-h-14 h-auto">No content available</p>
+                    <div id="loadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+                        <svg class="animate-spin h-8 w-8 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                    <img id="slideThumbnail" class="md:w-full w-40 rounded-md" src="" alt="Slide Thumbnail">
+                </div>
+                <div id="currentSlideNotes" class="text-sm text-gray-400"></div>
+            </div>
+
+            <div class="bg-gray-800 rounded-lg p-3 md:p-4">
+                <div class="text-sm md:text-xl font-semibold mb-2">Next Slide</div>
+                <div id="nextSlideText" class="mb-2 relative text-sm md:text-base flex justify-between items-center flex md:flex-col">
+                    <p class="content md:min-h-14 h-full text-xs md:text-base">No content available</p>
+                    <div id="nextLoadingSpinner" class="hidden absolute inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+                        <svg class="animate-spin h-8 w-8 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                       <img id="nextSlideThumbnail" class="md:w-full w-40 rounded-md md:block hidden" src="" alt="Next Slide Thumbnail">
+                </div>
+                <div id="nextSlideNotes" class="text-sm text-gray-400"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl mb-4 md:mb-6 px-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+            <button onclick="handlePrevious()" class="flex-1 md:flex-none px-6 md:px-8 py-4 md:py-3 bg-purple-900 hover:bg-purple-800 rounded-md flex items-center justify-center gap-2 transition-colors text-lg md:text-xl font-medium">
+                <span>←</span> Previous
+            </button>
+            <button onclick="handleNext()" class="flex-1 md:flex-none px-6 md:px-8 py-4 md:py-3 bg-purple-900 hover:bg-purple-800 rounded-md flex items-center justify-center gap-2 transition-colors text-lg md:text-xl font-medium">
+                Next <span>→</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add text fields at the bottom -->
+    <div class="w-full max-w-4xl mb-4 md:mb-6 px-2 mt-20">
+        <input type="text" id="ipInput" placeholder="IP" class=" p-2 mb-2 bg-gray-800 text-white rounded-md">
+        <input type="text" id="portInput" placeholder="PORT" class=" p-2 bg-gray-800 text-white rounded-md">
+        <button onclick="updateBaseUrl()" class=" px-6 py-2 bg-purple-900 hover:bg-purple-800 rounded-md text-md mt-2">
+            Submit
+        </button>
+    </div>
+</div>
+
+    <script>
+        let baseUrl = localStorage.getItem('baseUrl') || 'http://192.168.50.81:1025';
+        let currentSlide = 0;
+        let activePresentation = null;
+        let slideStatus = null;
+        let errorTimeout = null;
+
+        function setError(message) {
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = message;
+            errorElement.classList.remove('opacity-0');
+            
+            if (errorTimeout) {
+                clearTimeout(errorTimeout);
+            }
+            
+            errorTimeout = setTimeout(() => {
+                errorElement.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function updateBaseUrl() {
+            const ipInput = document.getElementById('ipInput');
+            const portInput = document.getElementById('portInput');
+            
+            const ip = ipInput.value.trim();
+            const port = portInput.value.trim();
+            
+            if (ip && port) {
+                const newBaseUrl = `http://${ip}:${port}`;
+                console.log(newBaseUrl);
+                baseUrl = newBaseUrl;
+                localStorage.setItem('baseUrl', newBaseUrl);
+                
+                // Clear the input fields
+                ipInput.value = '';
+                portInput.value = '';
+                
+                // Refresh the data with the new URL
+                fetchActivePresentation();
+                fetchSlideStatus();
+                
+                setError('Base URL updated successfully!');
+            } else {
+                setError('Please enter both IP and Port');
+            }
+        }
+
+        function displayCurrentUrl() {
+            const ipInput = document.getElementById('ipInput');
+            const portInput = document.getElementById('portInput');
+            
+            // Extract IP and port from the current baseUrl
+            const url = new URL(baseUrl);
+            ipInput.placeholder = `Current IP: ${url.hostname}`;
+            portInput.placeholder = `Current Port: ${url.port}`;
+        }
+
+        async function fetchSlideStatus() {
+            try {
+                const response = await fetch(`${baseUrl}/v1/status/slide`);
+                if (!response.ok) throw new Error('Failed to fetch slide status');
+                const data = await response.json();
+                slideStatus = data;
+                updateSlideDisplay();
+                await fetchSlideThumbnail();
+                await fetchNextSlideThumbnail();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch slide status');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await fetchActivePresentation();
+                await fetchSlideStatus();
+                displayCurrentUrl();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to initialize data');
+            }
+        });
+
+        async function fetchActivePresentation() {
+            try {
+                const response = await fetch(`${baseUrl}/v1/presentation/active`);
+                if (!response.ok) throw new Error('Failed to fetch active presentation');
+                const data = await response.json();
+                activePresentation = data;
+                
+                const slideIndexResponse = await fetch(`${baseUrl}/v1/presentation/slide_index`);
+                if (slideIndexResponse.ok) {
+                    const { presentation_index } = await slideIndexResponse.json();
+                    currentSlide = presentation_index.index;
+                }
+                updatePresentationDisplay();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch presentation data');
+            }
+        }
+
+        function updateSlideDisplay() {
+            if (slideStatus) {
+                const currentTextElement = document.getElementById('currentSlideText');
+                const nextTextElement = document.getElementById('nextSlideText');
+                const currentContentSpan = currentTextElement.querySelector('.content');
+                const nextContentSpan = nextTextElement.querySelector('.content');
+                
+                currentContentSpan.textContent = slideStatus.current?.text || 'No content available';
+                nextContentSpan.textContent = slideStatus.next?.text || 'No content available';
+                
+                document.getElementById('currentSlideNotes').textContent = slideStatus.current?.notes ? `Notes: ${slideStatus.current.notes}` : '';
+                document.getElementById('nextSlideNotes').textContent = slideStatus.next?.notes ? `Notes: ${slideStatus.next.notes}` : '';
+                
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('nextLoadingSpinner').classList.add('hidden');
+            }
+        }
+
+        async function handlePrevious() {
+            try {
+                document.getElementById('loadingSpinner').classList.remove('hidden');
+                
+                const response = await fetch(`${baseUrl}/v1/presentation/active/previous/trigger`, {
+                    method: 'GET'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to trigger previous slide');
+                }
+                
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    await fetchSlideStatus();
+                    await fetchActivePresentation(); // Ensure activePresentation is updated
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to trigger previous slide');
+                document.getElementById('loadingSpinner').classList.add('hidden');
+            }
+        }
+
+        async function handleNext() {
+            try {
+                document.getElementById('nextLoadingSpinner').classList.remove('hidden');
+                const response = await fetch(`${baseUrl}/v1/presentation/active/next/trigger`, { method: 'GET' });
+                if (!response.ok) throw new Error('Failed to trigger next slide');
+                currentSlide++;
+                await fetchSlideStatus();
+                await fetchActivePresentation(); // Ensure activePresentation is updated
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to trigger next slide');
+                document.getElementById('nextLoadingSpinner').classList.add('hidden');
+            }
+        }
+
+        setInterval(async function() {
+            try {
+                await fetchActivePresentation();
+                await fetchSlideStatus();
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to refresh data');
+            }
+        }, 10000);
+        
+        async function fetchSlideThumbnail() {
+            try {
+                document.getElementById('loadingSpinner').classList.remove('hidden'); // Show spinner
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide}?quality=400`);
+                if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('slideThumbnail').src = url;
+                document.getElementById('slideThumbnail').style.display = 'block'; // Show thumbnail
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
+                document.getElementById('slideThumbnail').style.display = 'none'; // Hide thumbnail
+            } finally {
+                document.getElementById('loadingSpinner').classList.add('hidden'); // Hide spinner
+            }
+        }
+
+        async function fetchNextSlideThumbnail() {
+            try {
+                document.getElementById('nextLoadingSpinner').classList.remove('hidden'); // Show spinner
+                const response = await fetch(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide+1}?quality=400`);
+                console.log("Next Slide");
+                console.log(`${baseUrl}/v1/presentation/${activePresentation.presentation.id.uuid}/thumbnail/${currentSlide+1}?quality=400`);
+                if (!response.ok) throw new Error('Failed to fetch slide thumbnail');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                document.getElementById('nextSlideThumbnail').src = url;
+                document.getElementById('nextSlideThumbnail').style.display = 'block'; // Show thumbnail
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
+                document.getElementById('nextSlideThumbnail').style.display = 'none'; // Hide thumbnail
+            } finally {
+                document.getElementById('nextLoadingSpinner').classList.add('hidden'); // Hide spinner
+            }
+        }
+
+        function updatePresentationDisplay() {
+            const presentationElement = document.getElementById('presentationName');
+            console.log(activePresentation);
+            if (activePresentation && activePresentation.presentation && activePresentation.presentation) {
+                presentationElement.textContent = `Current Presentation: ${activePresentation.presentation.id.name}`;
+            } else {
+                presentationElement.textContent = 'No active presentation';
+            }
+        }
+    </script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        #error {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .opacity-0 {
+            opacity: 0;
+        }
+    </style>
+</body>
+</html>
+
+   
