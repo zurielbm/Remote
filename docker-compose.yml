@@ -4,7 +4,7 @@ services:
   propresenter-viewer:
     build: .
     ports:
-      - "10:80"
+      - "8080:80"
     container_name: propresenter-slide-viewer
     restart: unless-stopped
     environment:
