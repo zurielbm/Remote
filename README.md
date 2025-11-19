@@ -1,4 +1,6 @@
-# ProPresenter Slide Clicker 🖱️
+# ProControl Slide Clicker 🖱️
+
+**ProControl Slide Clicker: A Third-Party Remote for ProPresenter.**
 
 This project is a simple web-based application designed to act as a remote viewer and clicker for ProPresenter presentations. It allows users to view the current and next slides, including their text content, notes, and thumbnails, and navigate through the presentation using "Previous" and "Next" buttons. The application connects to a ProPresenter instance via its API.
 
