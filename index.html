@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProPresenter Slide Viewer</title>
+    <title>ProControl</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,16 +13,17 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f3f0ff',
-                            100: '#e9e5ff',
-                            200: '#d6ccff',
-                            300: '#b8a5ff',
-                            400: '#9575ff',
-                            500: '#7c3aed',
-                            600: '#6d28d9',
-                            700: '#5b21b6',
-                            800: '#4c1d95',
-                            900: '#3b1a78'
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                            800: '#9a3412',
+                            900: '#7c2d12',
+                            950: '#431407',
                         }
                     }
                 }
@@ -35,6 +36,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -46,9 +48,12 @@
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.5;
             }
@@ -60,24 +65,29 @@
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 text-gray-900 dark:text-white min-h-screen flex flex-col items-center justify-center p-4 font-sans transition-colors duration-300">
-    
+<body
+    class="bg-gray-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-500 overflow-x-hidden selection:bg-brand-500 selection:text-white flex flex-col p-4">
+
+
     <div class="max-w-2xl mx-auto text-center fade-in">
         <!-- Logo/Icon -->
         <div class="mb-8">
-            <div class="w-20 h-20 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
+            <div
+                class="w-20 h-20 mx-auto bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg">
                 <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    </path>
                 </svg>
             </div>
         </div>
 
         <!-- Title -->
         <h1 class="text-4xl md:text-6xl font-bold text-primary-600 dark:text-primary-400 mb-4">
-            ProPresenter
+            ProControl
         </h1>
         <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 dark:text-gray-300 mb-6">
-            Slide Viewer
+            Slide Clicker
         </h2>
 
         <!-- Description -->
@@ -86,18 +96,20 @@
         </p>
 
         <!-- Version Selection -->
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 mb-8">
+        <div
+            class="bg-white/50 dark:bg-slate-900/50 rounded-2xl shadow-xl p-8 border border-slate-200 dark:border-slate-700 mb-8">
             <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-6">Choose Your Version</h3>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Standalone Version -->
                 <div class="group">
-                    <a href="standalone.html" 
-                       class="block p-6 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl border-2 border-primary-200 dark:border-primary-700 hover:border-primary-400 dark:hover:border-primary-500 transition-all duration-300 hover:shadow-lg transform hover:scale-105">
+                    <a href="standalone.html"
+                        class="block p-6 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 rounded-xl border-2 border-primary-200 dark:border-primary-700 hover:border-primary-400 dark:hover:border-primary-500 transition-all duration-300 hover:shadow-lg transform hover:scale-105">
                         <div class="flex items-center justify-center mb-4">
                             <div class="w-12 h-12 bg-primary-500 rounded-lg flex items-center justify-center">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                 </svg>
                             </div>
                         </div>
@@ -105,10 +117,13 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             Direct connection to ProPresenter. Configure IP and port manually.
                         </p>
-                        <div class="mt-4 flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
+                        <div
+                            class="mt-4 flex items-center justify-center text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300">
                             <span class="text-sm font-medium">Launch Standalone</span>
-                            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </div>
                     </a>
@@ -116,23 +131,33 @@
 
                 <!-- Server Version -->
                 <div class="group">
-                    <a href="static/index.html" 
-                       class="block p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border-2 border-green-200 dark:border-green-700 hover:border-green-400 dark:hover:border-green-500 transition-all duration-300 hover:shadow-lg transform hover:scale-105">
+                    <a href="static/index.html"
+                        class="block p-6 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-xl border-2 border-green-200 dark:border-green-700 hover:border-green-400 dark:hover:border-green-500 transition-all duration-300 hover:shadow-lg transform hover:scale-105">
                         <div class="flex items-center justify-center mb-4">
                             <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                                    </path>
                                 </svg>
                             </div>
                         </div>
-                        <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">Docker Server Version</h4>
+                        <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">Docker Server Version
+                        </h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             Full-featured version with server backend. REQUIRES SERVER
+                            <span id="serverStatusBadge"
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 ml-2 hidden">
+                                Checking...
+                            </span>
                         </p>
-                        <div class="mt-4 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300">
+                        <div
+                            class="mt-4 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300">
                             <span class="text-sm font-medium">Launch Server Version</span>
-                            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            <svg class="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                </path>
                             </svg>
                         </div>
                     </a>
@@ -143,30 +168,41 @@
         <!-- Features -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="text-center">
-                <div class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
-                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                <div
+                    class="w-12 h-12 mx-auto bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                        </path>
                     </svg>
                 </div>
                 <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Live Preview</h4>
                 <p class="text-sm text-gray-600 dark:text-gray-400">View current and next slides in real-time</p>
             </div>
-            
+
             <div class="text-center">
-                <div class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3">
-                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                <div
+                    class="w-12 h-12 mx-auto bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
                 </div>
                 <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Remote Control</h4>
                 <p class="text-sm text-gray-600 dark:text-gray-400">Control slides from any device on your network</p>
             </div>
-            
+
             <div class="text-center">
-                <div class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
-                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <div
+                    class="w-12 h-12 mx-auto bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-3">
+                    <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
                 <h4 class="font-semibold text-gray-800 dark:text-white mb-2">Easy Setup</h4>
@@ -177,19 +213,23 @@
         <!-- Footer -->
         <div class="text-center">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                Compatible with ProPresenter 7+ • Web-based interface • No installation required
+                ProControl Slide Clicker: A Third-Party Remote for ProPresenter.
             </p>
         </div>
     </div>
 
     <!-- Theme toggle button -->
-    <button onclick="toggleTheme()" 
-            class="fixed top-4 right-4 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-gray-700">
-        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+    <button onclick="toggleTheme()"
+        class="fixed top-4 right-4 p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200 border border-gray-200 dark:border-gray-700">
+        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor"
+            viewBox="0 0 20 20">
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
         </svg>
-        <svg id="theme-toggle-light-icon" class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+        <svg id="theme-toggle-light-icon" class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor"
+            viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                clip-rule="evenodd"></path>
         </svg>
     </button>
 
@@ -231,22 +271,32 @@
 
         // Auto-redirect logic (optional)
         function checkForServer() {
-            // Try to detect if server is running by checking for server endpoints
-            fetch('/api/health')
+            const badge = document.getElementById('serverStatusBadge');
+            if (badge) badge.classList.remove('hidden');
+
+            fetch('/health')
                 .then(response => {
                     if (response.ok) {
-                        // Server is running, could auto-redirect to server version
-                        console.log('Server detected - showing both options');
+                        console.log('Server detected');
+                        if (badge) {
+                            badge.textContent = 'ONLINE';
+                            badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-2';
+                        }
+                    } else {
+                        throw new Error('Server error');
                     }
                 })
                 .catch(() => {
-                    // No server detected, standalone is the primary option
-                    console.log('No server detected - standalone mode recommended');
+                    console.log('No server detected');
+                    if (badge) {
+                        badge.textContent = 'OFFLINE';
+                        badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-2';
+                    }
                 });
         }
 
         // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             initializeTheme();
             checkForServer();
         });
