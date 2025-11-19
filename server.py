@@ -57,5 +57,9 @@ def get_propresenter():
     global PROPRESENTER_IP, PROPRESENTER_PORT
     return {"ip": PROPRESENTER_IP,"port":PROPRESENTER_PORT}
 
+@app.route('/health')
+def health_check():
+    return {"status": "ok"}, 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=FLASK_PORT,debug=False)

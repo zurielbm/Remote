@@ -146,6 +146,10 @@
                         </h4>
                         <p class="text-sm text-gray-600 dark:text-gray-400">
                             Full-featured version with server backend. REQUIRES SERVER
+                            <span id="serverStatusBadge"
+                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 ml-2 hidden">
+                                Checking...
+                            </span>
                         </p>
                         <div
                             class="mt-4 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:text-green-700 dark:group-hover:text-green-300">
@@ -267,17 +271,27 @@
 
         // Auto-redirect logic (optional)
         function checkForServer() {
-            // Try to detect if server is running by checking for server endpoints
-            fetch('/api/health')
+            const badge = document.getElementById('serverStatusBadge');
+            if (badge) badge.classList.remove('hidden');
+
+            fetch('/health')
                 .then(response => {
                     if (response.ok) {
-                        // Server is running, could auto-redirect to server version
-                        console.log('Server detected - showing both options');
+                        console.log('Server detected');
+                        if (badge) {
+                            badge.textContent = 'ONLINE';
+                            badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 ml-2';
+                        }
+                    } else {
+                        throw new Error('Server error');
                     }
                 })
                 .catch(() => {
-                    // No server detected, standalone is the primary option
-                    console.log('No server detected - standalone mode recommended');
+                    console.log('No server detected');
+                    if (badge) {
+                        badge.textContent = 'OFFLINE';
+                        badge.className = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 ml-2';
+                    }
                 });
         }
 

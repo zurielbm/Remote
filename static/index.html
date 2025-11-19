@@ -358,11 +358,127 @@
             </p>
         </div>
     </div>
+
+    <!-- Docker Error Overlay -->
+    <div id="dockerErrorOverlay"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-card p-8 rounded-2xl max-w-md w-full mx-4 text-center transform transition-all scale-95 duration-300"
+            id="dockerErrorContent">
+            <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                    </path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-3">Connection Failed</h2>
+            <div class="text-left space-y-4 mb-6">
+                <div class="flex gap-3">
+                    <div
+                        class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center text-sm font-bold">
+                        1</div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200">Start Docker Server</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Run the server via desktop app or
+                            terminal.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <div
+                        class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center text-sm font-bold">
+                        2</div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200">Click the New Link</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">Look for a url like <code
+                                class="bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-xs">http://127.0.0.1:80</code>
+                            in your terminal/UI and click it.</p>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <div
+                        class="flex-shrink-0 w-6 h-6 rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-600 dark:text-brand-400 flex items-center justify-center text-sm font-bold">
+                        3</div>
+                    <div>
+                        <h3 class="font-semibold text-slate-800 dark:text-slate-200">Close This Tab</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-400">This tab cannot connect. Use the new tab
+                            that opens.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 mb-6 text-left">
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider font-semibold">Run in
+                    terminal:</p>
+                <code
+                    class="block text-sm font-mono text-brand-600 dark:text-brand-400 bg-white dark:bg-slate-900 p-2 rounded border border-slate-200 dark:border-slate-700 select-all">docker compose up --build</code>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <a href="../standalone.html"
+                    class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
+                    <span>Use Standalone Version</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentSlide = 0;
         let activePresentation = null;
         let slideStatus = null;
         let errorTimeout = null;
+
+        function showDockerError() {
+            const overlay = document.getElementById('dockerErrorOverlay');
+            const content = document.getElementById('dockerErrorContent');
+            if (overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            }
+        }
+
+        function hideDockerError() {
+            const overlay = document.getElementById('dockerErrorOverlay');
+            const content = document.getElementById('dockerErrorContent');
+            if (!overlay.classList.contains('hidden')) {
+                overlay.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    hideDockerError();
+                } else {
+                    showDockerError();
+                }
+            } catch (err) {
+                showDockerError();
+            }
+        }
+
+        // Check health every 2 seconds
+        setInterval(checkHealth, 2000);
+
+        function checkNetworkError(err) {
+            if (err.message && (err.message.includes("NetworkError") || err.message.includes("Failed to fetch"))) {
+                showDockerError();
+            }
+        }
 
 
         function hasPresentation() {
@@ -437,6 +553,7 @@
                     ipInput.value = ip;
                     portInput.value = port;
                 } catch (err) {
+                    checkNetworkError(err);
                     setError('Failed to update ProPresenter backend.');
                 }
             } else {
@@ -454,14 +571,17 @@
                         portInput.placeholder = `Current Port: ${res2.port}`;
                     })
                 }
+            }).catch((err) => {
+                checkNetworkError(err);
             })
-
-
         }
 
         async function fetchSlideStatus() {
             try {
                 const response = await fetch(`/v1/status/slide`);
+                if (response.status === 502) {
+                    throw new Error('Please check your ProPresenter connection');
+                }
                 if (!response.ok) throw new Error('Failed to fetch slide status');
                 const data = await response.json();
 
@@ -474,6 +594,7 @@
                 previousCurrentSlide = currentSlide;
 
             } catch (err) {
+                checkNetworkError(err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide status');
             }
         }
@@ -492,6 +613,9 @@
         async function fetchActivePresentation() {
             try {
                 const response = await fetch(`/v1/presentation/active`);
+                if (response.status === 502) {
+                    throw new Error('Docker server not running');
+                }
                 if (!response.ok) throw new Error('Failed to fetch active presentation');
                 const data = await response.json();
 
@@ -509,6 +633,7 @@
 
                 }
             } catch (err) {
+                checkNetworkError(err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch presentation data');
             }
         }
@@ -549,6 +674,7 @@
                     await fetchActivePresentation(); // Ensure activePresentation is updated
                 }
             } catch (err) {
+                checkNetworkError(err);
                 setError(err instanceof Error ? err.message : 'Failed to trigger previous slide');
                 document.getElementById('loadingSkeleton').classList.add('hidden');
             }
@@ -563,6 +689,7 @@
                 await fetchSlideStatus();
                 await fetchActivePresentation(); // Ensure activePresentation is updated
             } catch (err) {
+                checkNetworkError(err);
                 setError(err instanceof Error ? err.message : 'Failed to trigger next slide');
                 document.getElementById('nextLoadingSkeleton').classList.add('hidden');
             }
@@ -591,6 +718,7 @@
                 document.getElementById('slideThumbnail').src = url;
                 document.getElementById('slideThumbnail').style.display = 'block'; // Show thumbnail
             } catch (err) {
+                checkNetworkError(err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch slide thumbnail');
                 // Show placeholder image when thumbnail fails to load
                 document.getElementById('slideThumbnail').style.display = 'none';
@@ -619,6 +747,7 @@
                     nextBtn.disabled = false;
                 }
             } catch (err) {
+                checkNetworkError(err);
                 // Don't show error for missing next slide, just disable button
                 document.getElementById('nextSlideThumbnail').style.display = 'none'; // Hide thumbnail
 
